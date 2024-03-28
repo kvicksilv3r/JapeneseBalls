@@ -3,25 +3,57 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum BallType
+{
+    None,
+    Vanilla
+}
+
 public class PachinkoBall : MonoBehaviour
 {
+    private static string BALL_COLLISION_LAYER = "BallCollision";
+    private static int BALL_KILL_HEIGHT = -10;
+
+    [SerializeField]
     protected float baseValue = 0f;
     protected float currentValue = 0f;
+    protected float pickWeight = 0f;
 
+    [SerializeField]
+    protected BallType ballType;
+
+    private Rigidbody2D ballRb;
+
+    [SerializeField]
     protected bool canCollideWithOtherBall = false;
 
-    protected void CheckOutOfBounds()
+    public Rigidbody2D BallRb { get => ballRb; set => ballRb = value; }
+
+    protected virtual void Awake()
     {
-        if (transform.position.y < -6)
+        if (!ballRb)
         {
-            KillBall();
+            ballRb = GetComponentInChildren<Rigidbody2D>();
+        }
+
+        if (canCollideWithOtherBall)
+        {
+            gameObject.layer = LayerMask.NameToLayer(BALL_COLLISION_LAYER);
         }
     }
 
-    private void Update()
+    protected virtual void Update()
     {
         CheckOutOfBounds();
         //CheckStaleBall();  
+    }
+
+    protected void CheckOutOfBounds()
+    {
+        if (transform.position.y < BALL_KILL_HEIGHT)
+        {
+            KillBall();
+        }
     }
 
     protected void CheckStaleBall()
@@ -38,6 +70,6 @@ public class PachinkoBall : MonoBehaviour
     internal void Collected()
     {
         //Handle controlled destruction
-        gameObject.SetActive(false);
+        Destroy(gameObject);
     }
 }
